@@ -1,0 +1,16 @@
+server:
+  port: 8090
+
+spring:
+  datasource:
+    # H2 en modo PostgreSQL: el esqueleto arranca sin instalar nada más.
+    url: jdbc:h2:mem:studioflow;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
+
+studioflow:
+  planificacion:
+    minutos-minimos-traslado: 45

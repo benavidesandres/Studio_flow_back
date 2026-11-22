@@ -1,0 +1,30 @@
+<section id="drivers" data-transition="fade" style="background:#F4F7F6;color:#17242B;font-family:'Archivo', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6A6C">Drivers</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1">Tres drivers, cada uno con su origen</h2>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;gap:36px;align-items:center;background:#FFFFFF;padding:28px 40px;border:1px solid #CDD7DB;border-radius:12px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:72px;font-weight:700;color:#0A6A6C;width:80px">1</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:40px;font-weight:700">Integridad de la agenda</h3>
+<p style="font-size:28px;line-height:1.3;color:#55666F">Origen: carrera observada en el backend actual, que valida y luego guarda sin bloqueo. Una cita imposible detiene un día de rodaje.</p>
+</div>
+</div>
+<div style="display:flex;gap:36px;align-items:center;background:#FFFFFF;padding:28px 40px;border:1px solid #CDD7DB;border-radius:12px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:72px;font-weight:700;color:#0A6A6C;width:80px">2</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:40px;font-weight:700">Modificabilidad de las reglas</h3>
+<p style="font-size:28px;line-height:1.3;color:#55666F">Origen: normas como la Ley 1098 cambian las reglas, y hacerlo no debe tocar Presupuesto.</p>
+</div>
+</div>
+<div style="display:flex;gap:36px;align-items:center;background:#FFFFFF;padding:28px 40px;border:1px solid #CDD7DB;border-radius:12px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:72px;font-weight:700;color:#0A6A6C;width:80px">3</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:40px;font-weight:700">Disponibilidad del llamado en locación</h3>
+<p style="font-size:28px;line-height:1.3;color:#55666F">Origen: hipótesis por validar con un equipo de rodaje. Es el driver más débil y lo decimos así.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#55666F">StudioFlow · Grupo 5A</p>
+<p style="position:absolute;right:128px;bottom:64px;font-size:24px;color:#55666F">3</p>
+<aside>Qué decir (50 s). El primer driver no salió de una suposición: leímos el backend que ya tenemos y vimos que SceneServiceImpl.createScene valida y luego guarda sin ningún bloqueo; dos solicitudes simultáneas pueden pasar. El segundo viene de la norma: cuando cambia una ley, cambian las reglas. El tercero es una hipótesis nuestra sobre cómo se trabaja en locación; todavía no la validamos con un equipo real, y preferimos decirlo antes de que nos lo pregunten.</aside>
+</section>

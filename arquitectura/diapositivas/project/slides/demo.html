@@ -1,0 +1,19 @@
+<section id="demo" data-transition="fade" style="background:#F4F7F6;color:#17242B;font-family:'Archivo', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6A6C">Demostración en vivo</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.1">Un comando, cinco pasos, un presupuesto</h2>
+<table style="font-size:28px;color:#17242B;background:#FFFFFF">
+<tr><th style="width:36%">Paso</th><th style="width:40%">Qué demuestra</th><th style="width:24%">Respuesta</th></tr>
+<tr><td style="width:36%">1 · Programar SC-1</td><td style="width:40%">Web → aplicación → dominio → base</td><td style="width:24%"><b>201</b></td></tr>
+<tr><td style="width:36%">2 · SC-2 solapada</td><td style="width:40%">Regla bloqueante</td><td style="width:24%"><b>409</b> SOLAPAMIENTO</td></tr>
+<tr><td style="width:36%">3 · SC-3 con 30 min</td><td style="width:40%">Advertencia sin aceptar</td><td style="width:24%"><b>409</b> TRASLADO</td></tr>
+<tr><td style="width:36%">4 · SC-3 aceptando</td><td style="width:40%">Aceptación explícita</td><td style="width:24%"><b>201</b> con aviso</td></tr>
+<tr><td style="width:36%">5 · Técnica como actor</td><td style="width:40%">Contrato con Reparto</td><td style="width:24%"><b>400</b></td></tr>
+</table>
+<div style="display:flex;gap:32px">
+<p style="flex:1;font-size:28px;line-height:1.3;background:#FFFFFF;padding:20px 28px;border:1px solid #CDD7DB;border-radius:12px"><b>Presupuesto comprometido: 250.000.</b> Los rechazos no sumaron.</p>
+<p style="flex:1;font-size:28px;line-height:1.3;background:#FFFFFF;padding:20px 28px;border:1px solid #CDD7DB;border-radius:12px"><b>mvn test: 6 pruebas en verde.</b> Incluye el atajo plantado.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#55666F">mvn spring-boot:run · http://localhost:8090</p>
+<p style="position:absolute;right:128px;bottom:64px;font-size:24px;color:#55666F">9</p>
+<aside>Demo (2,5 min). Antes: la aplicación ya corriendo con mvn spring-boot:run en arquitectura/esqueleto, reiniciada para que los datos estén limpios. Abrir localhost:8090 y pulsar en orden los pasos 1 a 5; narrar cada código. Luego pulsar Consultar presupuesto: debe decir comprometido 250000, que es SC-1 más SC-3 aceptada; SC-2 rechazada no suma. Después, en otra terminal, mvn test: 6 pruebas, de las cuales ReglasDeArquitecturaTest prueba que la regla ArchUnit detecta un atajo plantado a propósito. Opcional si hay tiempo: comentar la línea agenda.bloquearAgendas en ProgramarEscena y correr mvn test para ver fallar la concurrencia; luego restaurarla. Plan B si falla algo: tener capturas o la salida de los pasos en el README.</aside>
+</section>

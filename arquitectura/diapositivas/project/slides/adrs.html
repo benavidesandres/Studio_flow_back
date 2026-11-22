@@ -1,0 +1,24 @@
+<section id="adrs" data-transition="fade" style="background:#F4F7F6;color:#17242B;font-family:'Archivo', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6A6C">Tres ADR</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.1">Cada decisión trae su consecuencia mala</h2>
+<div style="display:flex;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;padding:32px;border:1px solid #CDD7DB;border-radius:12px">
+<h3 style="font-size:34px;font-weight:700;color:#0A6A6C">ADR-001 Monolito modular</h3>
+<p style="font-size:26px;line-height:1.3"><b>Descartado:</b> microservicios y eventos con bróker.</p>
+<p style="font-size:26px;line-height:1.3;color:#A3361F"><b>Empeora:</b> escalar un módulo por separado; ArchUnit no revisa el SQL.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;padding:32px;border:1px solid #CDD7DB;border-radius:12px">
+<h3 style="font-size:34px;font-weight:700;color:#0A6A6C">ADR-002 Bloqueo por actor</h3>
+<p style="font-size:26px;line-height:1.3"><b>Descartado:</b> optimista, EXCLUDE y SERIALIZABLE.</p>
+<p style="font-size:26px;line-height:1.3;color:#A3361F"><b>Empeora:</b> escrituras del mismo actor en serie; cada solicitud retiene una conexión.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;padding:32px;border:1px solid #CDD7DB;border-radius:12px">
+<h3 style="font-size:34px;font-weight:700;color:#0A6A6C">ADR-003 Evento en la transacción</h3>
+<p style="font-size:26px;line-height:1.3"><b>Descartado:</b> llamada directa, evento posterior, outbox y disparador.</p>
+<p style="font-size:26px;line-height:1.3;color:#A3361F"><b>Empeora:</b> si Presupuesto falla no se puede programar.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#55666F">StudioFlow · Grupo 5A</p>
+<p style="position:absolute;right:128px;bottom:64px;font-size:24px;color:#55666F">10</p>
+<aside>Qué decir (50 s). Los tres ADR tienen estado, contexto, decisión, alternativas descartadas y consecuencias, incluidas las malas, y están completos en el documento de diseño. Resumen: ADR-001 monolito modular, descartamos microservicios y eventos; lo malo es no poder escalar por módulo. ADR-002 bloqueo pesimista por actor; lo malo es la serialización y las conexiones retenidas. ADR-003 evento síncrono en la misma transacción hacia Presupuesto; lo malo es que si Presupuesto falla no se programa, y la salida prevista es un outbox. Esa es la respuesta a «qué atributo empeoró y por qué es aceptable»: aceptable porque una escena sin dinero comprometido es peor que una escena rechazada.</aside>
+</section>

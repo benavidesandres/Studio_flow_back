@@ -1,0 +1,20 @@
+<section id="bloqueo" data-transition="fade" style="background:#11191D;color:#E4ECEF;font-family:'Archivo', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#62CFC8">ADR-002 · Escenario E1</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.1">Ocho solicitudes a la vez, una sola cita</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#18242A;padding:36px;border:2px solid #F0937D;border-radius:12px">
+<p style="font-size:30px;color:#9FB0B8">Sin bloqueo (backend actual)</p>
+<p style="font-size:120px;font-weight:700;line-height:1.0;color:#F0937D">4 a 6 de 8</p>
+<p style="font-size:28px;color:#F0937D;font-weight:600">citas aceptadas: error</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#18242A;padding:36px;border:2px solid #62CFC8;border-radius:12px">
+<p style="font-size:30px;color:#9FB0B8">Con SELECT … FOR UPDATE por actor</p>
+<p style="font-size:120px;font-weight:700;line-height:1.0;color:#62CFC8">1 de 8</p>
+<p style="font-size:28px;color:#62CFC8;font-weight:600">cita aceptada, 7 con 409: correcto</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.35;color:#9FB0B8">Descartadas: bloqueo optimista (reintentos en el pico), restricción EXCLUDE (no expresa la advertencia de traslado) y SERIALIZABLE (obliga a repetir toda la operación). Medido en H2 y en PostgreSQL 16.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#9FB0B8">StudioFlow · Grupo 5A</p>
+<p style="position:absolute;right:128px;bottom:64px;font-size:24px;color:#9FB0B8">8</p>
+<aside>Qué decir (50 s). Esta es la decisión que más importa. Antes: 8 hilos programan la misma franja para el mismo actor y se aceptaron entre 4 y 6 según la corrida, o sea citas dobles. Ahora cada actor tiene una fila de agenda y la transacción la bloquea con SELECT FOR UPDATE, en orden de id para evitar interbloqueos. Resultado: 1 aceptada y 7 rechazadas con 409. Lo probamos en H2 con la prueba automática y en PostgreSQL 16 en Docker. Todavía no en Supabase ni con su pooler de transacciones: es el riesgo R1. Alternativas descartadas: optimista, EXCLUDE y SERIALIZABLE. Qué empeora: las escrituras de un mismo actor se serializan y cada solicitud retiene una conexión mientras espera.</aside>
+</section>

@@ -1,0 +1,17 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-11-11T22:00:00Z" },
+  "lists": "css",
+  "title": "StudioFlow · Sustentación de arquitectura",
+  "order": ["cover", "dominio", "drivers", "arbol", "estilo", "c4", "contextos", "bloqueo", "demo", "adrs", "riesgos", "cierre"],
+  "sections": {
+    "s1": { "description": "El dominio y los drivers que gobiernan el diseño.", "start": "cover" },
+    "s2": { "description": "Las decisiones de estructura, sus alternativas descartadas y su precio.", "start": "estilo" },
+    "s3": { "description": "La evidencia en vivo, los riesgos y las respuestas de cierre.", "start": "demo" }
+  },
+  "faces": {
+    "archivo": { "family": "Archivo", "href": "https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" },
+    "courier-prime": { "family": "Courier Prime", "href": "https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" }
+  },
+  "designSystems": []
+}

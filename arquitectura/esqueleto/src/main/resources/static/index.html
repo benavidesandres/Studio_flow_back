@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudioFlow · Esqueleto</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+    button { display: block; width: 100%; text-align: left; padding: .6rem .8rem; margin: .4rem 0; font: inherit; cursor: pointer; }
+    pre { background: #f2f2f2; padding: 1rem; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>StudioFlow · demostración del esqueleto</h1>
+  <p>Ejecuta los pasos en orden. Reiniciar la aplicación borra los datos.</p>
+  <div id="pasos"></div>
+  <button id="presupuesto">Consultar presupuesto de la producción 1</button>
+  <h2 id="estado">Respuesta</h2>
+  <pre id="salida">—</pre>
+
+  <script>
+    const escena = (numero, inicio, fin, locacion, costo, extra = {}) => ({
+      produccionId: 1, numero, locacion, costo, actorIds: [1],
+      inicio: `2026-12-01T${inicio}:00`, fin: `2026-12-01T${fin}:00`, aceptarAdvertencias: false, ...extra,
+    });
+
+    const pasos = [
+      ['1. Programar SC-1, 08:00–10:00 en Estudio → 201', escena('SC-1', '08:00', '10:00', 'Estudio', 100000)],
+      ['2. Solapar SC-2, 09:00–11:00, con el mismo actor → 409 bloqueante', escena('SC-2', '09:00', '11:00', 'Estudio', 50000)],
+      ['3. SC-3 en Centro, 30 min después de SC-1 → 409 advertencia', escena('SC-3', '10:30', '12:00', 'Centro', 150000)],
+      ['4. Repetir SC-3 aceptando la advertencia → 201 con advertencia', escena('SC-3', '10:30', '12:00', 'Centro', 150000, { aceptarAdvertencias: true })],
+      ['5. Citar a una persona del equipo técnico como actor → 400', escena('SC-4', '14:00', '15:00', 'Estudio', 10000, { actorIds: [9] })],
+    ];
+
+    const mostrar = async (respuesta) => {
+      document.getElementById('estado').textContent = `HTTP ${respuesta.status}`;
+      document.getElementById('salida').textContent = JSON.stringify(await respuesta.json(), null, 2);
+    };
+
+    for (const [etiqueta, cuerpo] of pasos) {
+      const boton = document.createElement('button');
+      boton.textContent = etiqueta;
+      boton.onclick = async () => mostrar(await fetch('/api/planificacion/escenas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      }));
+      document.getElementById('pasos').append(boton);
+    }
+
+    document.getElementById('presupuesto').onclick = async () => mostrar(await fetch('/api/presupuesto/1'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<meta charset="utf-8">
+<title>Arquitectura de StudioFlow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+  /* Layout: una columna de lectura; las tablas y diagramas ocupan todo el ancho. Los rótulos usan la tipografía de guion. */
+  :root {
+    --bg: #f6f8f8; --panel: #ffffff; --fg: #17242b; --muted: #55666f; --line: #cdd7db;
+    --accent: #0a6a6c; --alta: #a3361f; --media: #8a5a00; --baja: #3f6b45;
+    --body: "Archivo", "Segoe UI", system-ui, sans-serif; --guion: "Courier Prime", "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #11191d; --panel: #18242a; --fg: #e4ecef; --muted: #9fb0b8; --line: #33444c;
+    --accent: #62cfc8; --alta: #f0937d; --media: #e3b75c; --baja: #93cc9b; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #11191d; --panel: #18242a; --fg: #e4ecef; --muted: #9fb0b8; --line: #33444c;
+    --accent: #62cfc8; --alta: #f0937d; --media: #e3b75c; --baja: #93cc9b; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); }
+  main { max-width: 1040px; margin: 0 auto; padding-block: 40px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 44px; }
+  main > * { min-width: 0; }
+  section { display: grid; gap: 14px; }
+  section > * { min-width: 0; }
+  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; margin: 0; text-wrap: balance; }
+  h2 { font: 700 1.25rem/1.3 var(--guion); text-transform: uppercase; letter-spacing: .03em; margin: 0; padding-bottom: 8px; border-bottom: 2px solid var(--fg); }
+  h3 { font-size: 1.08rem; margin: 10px 0 0; }
+  p, ul, ol { margin: 0; max-width: 70ch; }
+  ul, ol { padding-left: 1.25rem; }
+  li + li { margin-top: 4px; }
+  .sub { color: var(--muted); max-width: 70ch; }
+  .tabla { overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+  th, td { padding: 9px 11px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); min-width: 104px; }
+  tr:last-child td { border-bottom: 0; }
+  th { font: 700 .8rem/1.3 var(--guion); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .ancho { min-width: 760px; }
+  .p { font: 700 .86rem var(--guion); white-space: nowrap; }
+  .A { color: var(--alta); } .M { color: var(--media); } .B { color: var(--baja); }
+  code { font: .9em var(--guion); overflow-wrap: anywhere; }
+  .escenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+  .escenario, .adr { background: var(--panel); border: 1px solid var(--line); padding: 16px; display: grid; gap: 7px; align-content: start; min-width: 0; }
+  .escenario h3, .adr h3 { margin: 0; }
+  .escenario dl { margin: 0; display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px; font-size: .92rem; }
+  dt { font: 700 .78rem/1.6 var(--guion); text-transform: uppercase; color: var(--muted); }
+  dd { margin: 0; }
+  .adr h4 { font: 700 .82rem var(--guion); text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin: 8px 0 0; }
+  figure { margin: 0; display: grid; gap: 10px; min-width: 0; }
+  .lienzo { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); padding: 10px; color: var(--fg); }
+  .lienzo svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  figcaption { font-size: .92rem; color: var(--muted); max-width: 78ch; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .86rem; }
+  .leyenda span { display: inline-flex; align-items: center; gap: 7px; }
+  .leyenda i { display: inline-block; width: 28px; height: 15px; border: 1.5px solid var(--fg); }
+  .leyenda i.mod { border-color: var(--accent); }
+  .leyenda i.fron { border-style: dashed; border-color: var(--muted); }
+  .leyenda i.lin { height: 0; border-width: 1.5px 0 0; }
+  .leyenda i.plan { height: 0; border-width: 1.5px 0 0; border-style: dashed; }
+  svg .caja { fill: var(--panel); stroke: currentColor; stroke-width: 1.5; }
+  svg .modulo { fill: var(--bg); stroke: var(--accent); stroke-width: 1.5; }
+  svg .fron { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 7 5; }
+  svg .api { fill: none; stroke: currentColor; stroke-width: 1.5; }
+  svg .plan { fill: var(--panel); stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+  svg .fl { fill: none; stroke: currentColor; stroke-width: 1.4; }
+  svg .fld { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+  svg text { fill: currentColor; font: 13px var(--body); }
+  svg .n { font-weight: 700; font-size: 14px; }
+  svg .m { fill: var(--muted); font-size: 12px; }
+  svg .mal { fill: var(--alta); font-weight: 700; }
+  svg .bien { fill: var(--baja); font-weight: 700; }
+  svg .espera { fill: var(--line); stroke: var(--muted); }
+  svg .choque { fill: var(--panel); stroke: var(--alta); stroke-width: 2; }
+  svg .punta { fill: currentColor; }
+
+  /* Impresión / PDF: tema claro fijo, sin cortes dentro de tablas, diagramas ni ADR. */
+  @page { size: A4; margin: 16mm 14mm; }
+  @media print {
+    :root, :root:not([data-theme="light"]) {
+      --bg: #ffffff; --panel: #ffffff; --fg: #17242b; --muted: #55666f; --line: #b9c5ca;
+      --accent: #0a6a6c; --alta: #a3361f; --media: #8a5a00; --baja: #3f6b45; color-scheme: light; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11.5pt; line-height: 1.5; }
+    main { display: block; max-width: none; padding: 0; }
+    main > section, main > header { display: block; margin-top: 26px; }
+    main > header { margin-top: 0; }
+    section > * + *, header > * + * { margin-top: 10px; }
+    figure { display: block; }
+    figure > * + * { margin-top: 8px; }
+    section > h2 { margin-bottom: 6px; }
+    .adr { display: block; }
+    .adr h4 { margin-top: 8px; }
+    .adr p, .adr ul { margin-top: 3px; }
+    h2 { break-after: avoid; }
+    h3, h4 { break-after: avoid; }
+    .tabla { overflow: visible; }
+    .ancho { min-width: 0; }
+    table { font-size: 9.5pt; }
+    th, td { min-width: 0; padding: 6px 8px; }
+    tr, .escenario, .adr, figure, .lienzo { break-inside: avoid; }
+    .lienzo { overflow: visible; padding: 6px; }
+    .lienzo svg { min-width: 0; }
+    .escenarios { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .escenario, .adr { padding: 12px; }
+    .adr { gap: 4px; }
+  }
+</style>
+
+<main>
+  <header style="display:grid;gap:12px">
+    <p style="font:700 .9rem var(--guion);color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin:0">Entregable 1 · Diseño documentado</p>
+    <h1>Arquitectura de StudioFlow</h1>
+    <p class="sub">StudioFlow planifica rodajes audiovisuales: programa escenas, cita actores, detecta choques de agenda y controla el presupuesto comprometido. Los objetivos numéricos son metas propuestas por el equipo. Todavía no se han validado con una producción real. La columna «Origen» indica de dónde sale cada driver.</p>
+  </header>
+
+  <section>
+    <h2>Drivers y restricciones</h2>
+    <p>Escala: <span class="p A">A</span> alta, <span class="p M">M</span> media, <span class="p B">B</span> baja. Cada hoja lleva (importancia, dificultad). La única hoja (A,A) define el driver principal.</p>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Atributo</th><th>Refinamiento</th><th>Hoja</th><th>Prioridad</th><th>Origen</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2"><strong>Integridad de la agenda</strong></td><td>Concurrencia</td><td>Dos programaciones simultáneas no citan dos veces al mismo actor (E1)</td><td class="p"><span class="A">A</span>,<span class="A">A</span></td><td>Carrera observada en <code>SceneServiceImpl.createScene</code>: valida y luego guarda, sin bloqueo</td></tr>
+        <tr><td>Reglas</td><td>El solapamiento siempre se rechaza; el traslado corto solo pasa si se acepta</td><td class="p"><span class="A">A</span>,<span class="B">B</span></td><td>Motor de conflictos actual</td></tr>
+        <tr><td rowspan="3"><strong>Modificabilidad</strong></td><td>Reglas normativas</td><td>Agregar un tope legal de horas para menores toca solo Planificación (E2)</td><td class="p"><span class="A">A</span>,<span class="M">M</span></td><td>Ley 1098 de 2006, art. 35</td></tr>
+        <tr><td>Parámetros</td><td>Cambiar los 45 minutos de traslado por configuración</td><td class="p"><span class="M">M</span>,<span class="B">B</span></td><td><code>minimum-travel-minutes</code></td></tr>
+        <tr><td>Despliegue</td><td>Extraer Presupuesto como servicio aparte</td><td class="p"><span class="B">B</span>,<span class="A">A</span></td><td>Hipótesis de crecimiento</td></tr>
+        <tr><td rowspan="2"><strong>Disponibilidad</strong></td><td>Operación en locación</td><td>El llamado del día se consulta con red intermitente (E3)</td><td class="p"><span class="A">A</span>,<span class="M">M</span></td><td>Hipótesis por validar con un equipo de rodaje</td></tr>
+        <tr><td>Recuperación</td><td>Reiniciar la API sin perder datos confirmados</td><td class="p"><span class="M">M</span>,<span class="B">B</span></td><td>Base gestionada en Supabase</td></tr>
+        <tr><td rowspan="2"><strong>Seguridad</strong></td><td>Autorización</td><td>Actores y equipo técnico no obtienen cifras de presupuesto (E4)</td><td class="p"><span class="A">A</span>,<span class="B">B</span></td><td>Matriz de permisos del producto</td></tr>
+        <tr><td>Datos personales</td><td>Teléfonos y correos del reparto con tratamiento autorizado</td><td class="p"><span class="M">M</span>,<span class="M">M</span></td><td>Ley 1581 de 2012</td></tr>
+        <tr><td rowspan="2"><strong>Desempeño</strong></td><td>Interacción</td><td>Validación en vacío al arrastrar una escena, p95 menor a 300 ms</td><td class="p"><span class="M">M</span>,<span class="B">B</span></td><td>Stripboard con arrastre</td></tr>
+        <tr><td>Auditoría</td><td>Conflictos de una producción de 2.000 escenas en menos de 2 s</td><td class="p"><span class="B">B</span>,<span class="M">M</span></td><td><code>detectAllConflicts</code> es O(n²)</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Tres drivers principales</h3>
+    <ol>
+      <li><strong>Integridad de la agenda.</strong> Una cita imposible detiene un día de rodaje, que es el mayor costo de la operación.</li>
+      <li><strong>Modificabilidad de las reglas.</strong> Las reglas cambian por norma y por tipo de producción.</li>
+      <li><strong>Disponibilidad del llamado en locación.</strong> El equipo consulta el llamado donde la conectividad es incierta.</li>
+    </ol>
+    <h3>Restricciones</h3>
+    <div class="tabla"><table>
+      <thead><tr><th>Tipo</th><th>Restricción</th><th>Efecto en el diseño</th></tr></thead>
+      <tbody>
+        <tr><td>Norma</td><td>Ley 1098 de 2006, art. 35: los menores de 15 años requieren autorización para actividades artísticas, con condiciones definidas en el permiso.</td><td>La agenda debe admitir límites por persona. Implementarla exige confirmar el tope aplicable (riesgo R5).</td></tr>
+        <tr><td>Norma</td><td>Ley 1581 de 2012, datos personales.</td><td>Reparto es dueño único de los datos de contacto.</td></tr>
+        <tr><td>Integración</td><td>PostgreSQL gestionado en Supabase, con límite de conexiones.</td><td>Las transacciones deben ser cortas (riesgo R1).</td></tr>
+        <tr><td>Operación</td><td>Rodajes en locaciones con conectividad incierta.</td><td>El llamado necesita copia local en el cliente.</td></tr>
+        <tr><td>Equipo</td><td>Dos personas, un semestre, stack existente en Spring Boot y React.</td><td>Descarta operar varios servicios.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Escenarios</h2>
+    <div class="escenarios">
+      <article class="escenario"><h3>E1 · Doble cita simultánea</h3><dl>
+        <dt>Fuente</dt><dd>Productor y director</dd><dt>Estímulo</dt><dd>Programan a la vez escenas solapadas con el mismo actor</dd><dt>Artefacto</dt><dd>Módulo Planificación y su agenda</dd><dt>Entorno</dt><dd>Pre-rodaje, carga pico de reprogramación</dd><dt>Respuesta</dt><dd>Se acepta una y las demás reciben 409 con el conflicto</dd><dt>Medida</dt><dd>0 citas dobles; p95 menor a 500 ms con 8 intentos concurrentes</dd></dl></article>
+      <article class="escenario"><h3>E2 · Nueva regla legal</h3><dl>
+        <dt>Fuente</dt><dd>Área jurídica de la productora</dd><dt>Estímulo</dt><dd>Exige limitar las horas semanales de menores</dd><dt>Artefacto</dt><dd>Dominio de Planificación</dd><dt>Entorno</dt><dd>Desarrollo, con sistema en producción</dd><dt>Respuesta</dt><dd>Se agrega la regla y un dato al contrato de Reparto; Presupuesto no cambia</dd><dt>Medida</dt><dd>Máximo 2 días-persona; 0 clases modificadas en Presupuesto; reglas de arquitectura en verde</dd></dl></article>
+      <article class="escenario"><h3>E3 · Llamado sin red</h3><dl>
+        <dt>Fuente</dt><dd>Integrante del equipo técnico</dd><dt>Estímulo</dt><dd>Abre el llamado del día</dd><dt>Artefacto</dt><dd>Aplicación web</dd><dt>Entorno</dt><dd>Rodaje en locación, sin conexión a la API</dd><dt>Respuesta</dt><dd>Muestra la última copia con su hora de actualización</dd><dt>Medida</dt><dd>Visible en menos de 3 s; copia de hasta 24 h de antigüedad</dd></dl></article>
+      <article class="escenario"><h3>E4 · Presupuesto restringido</h3><dl>
+        <dt>Fuente</dt><dd>Usuario con rol de actor</dd><dt>Estímulo</dt><dd>Pide la producción directamente a la API</dd><dt>Artefacto</dt><dd>API, frontera de Presupuesto</dd><dt>Entorno</dt><dd>Operación normal, sesión válida</dd><dt>Respuesta</dt><dd>La respuesta omite las cifras o devuelve 403</dd><dt>Medida</dt><dd>100 % de los endpoints cubiertos por prueba de rol</dd></dl></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Estilo elegido</h2>
+    <p><strong>Monolito modular con capas internas.</strong> Un proceso y una base de datos, con módulos que solo se comunican por contratos.</p>
+    <p><strong>Driver que lo justifica:</strong> la integridad de la agenda. Una agenda es de una persona y cruza producciones, y validar y guardar deben ocurrir de forma atómica. La modificabilidad se obtiene con fronteras verificadas por prueba, sin pagar la red.</p>
+    <p><strong>Qué sacrifica:</strong> escalar y desplegar cada módulo por separado. Un fallo grave del proceso afecta a todos los módulos. También depende de disciplina, que aquí se hace cumplir con pruebas.</p>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Alternativa</th><th>Qué ofrecía</th><th>Por qué se descartó</th></tr></thead>
+      <tbody>
+        <tr><td>Capas sin módulos (estado actual)</td><td>Simplicidad máxima</td><td>Nada impide que Presupuesto llegue a las tablas de escenas. Falla en E2.</td></tr>
+        <tr><td>Microservicios</td><td>Despliegue y escala independientes</td><td>La invariante de agenda quedaría sujeta a coordinación distribuida. El volumen no lo justifica y dos personas no pueden operarlo.</td></tr>
+        <tr><td>Arquitectura de eventos</td><td>Desacople y extensibilidad</td><td>La validación debe responder de forma síncrona a quien programa. Un bróker agrega infraestructura sin ayudar al driver principal.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Contextos delimitados</h2>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Contexto</th><th>Responsabilidad</th><th>Señal que justifica la frontera</th><th>Se comunica por</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Planificación</strong></td><td>Escenas, franjas, agenda, conflictos</td><td>Aquí «escena» es un intervalo con personas y lugar. Cambia cuando cambian las reglas de rodaje.</td><td>Publica <code>EscenaProgramada</code></td></tr>
+        <tr><td><strong>Reparto</strong></td><td>Personas, roles, datos de contacto</td><td>Concentra datos personales (Ley 1581). Aquí «actor» es una persona, no una ocupación de agenda.</td><td>Expone <code>DirectorioReparto</code></td></tr>
+        <tr><td><strong>Presupuesto</strong></td><td>Total, comprometido, disponible</td><td>Aquí «escena» es solo un costo. Otros usuarios y otra sensibilidad: solo productor y director.</td><td>Consume <code>EscenaProgramada</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>Locaciones permanece dentro de Planificación mientras sea solo un nombre. Identidad se trata como subdominio genérico resuelto con JWT y Spring Security.</p>
+  </section>
+
+  <section>
+    <h2>Tácticas aplicadas</h2>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Táctica</th><th>Escenario</th><th>Qué degrada</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>Bloqueo por agenda de actor, en orden fijo</td><td>E1</td><td>Rendimiento de escritura sobre un mismo actor</td><td>En el esqueleto</td></tr>
+        <tr><td>Encapsular módulos tras contratos</td><td>E2</td><td>Más indirección y más archivos</td><td>En el esqueleto</td></tr>
+        <tr><td>Restringir dependencias con pruebas ArchUnit</td><td>E2</td><td>Tiempo de pruebas; algunas refactorizaciones son más lentas</td><td>En el esqueleto</td></tr>
+        <tr><td>Reglas puras, sin framework</td><td>E1, E2</td><td>Requiere traducir entre dominio y persistencia</td><td>En el esqueleto</td></tr>
+        <tr><td>Copia local del llamado (degradación controlada)</td><td>E3</td><td>Frescura: se puede ver un llamado desactualizado</td><td>Planificada</td></tr>
+        <tr><td>Dos instancias sin estado detrás de un balanceador</td><td>E3</td><td>Costo de infraestructura</td><td>Planificada</td></tr>
+        <tr><td>Autorizar actores y limitar la exposición de datos</td><td>E4</td><td>Más DTO y más pruebas por rol</td><td>Planificada</td></tr>
+      </tbody>
+    </table></div>
+    <figure>
+      <div class="lienzo"><svg viewBox="0 0 880 220" role="img" aria-label="Sin bloqueo, dos transacciones leen la misma agenda y ambas guardan. Con bloqueo, la segunda espera, ve la escena de la primera y es rechazada.">
+        <text class="n" x="20" y="24">Sin bloqueo (backend actual)</text>
+        <text x="20" y="74">T1</text><text x="20" y="134">T2</text>
+        <rect class="caja" x="56" y="50" width="104" height="38"/><text x="108" y="74" text-anchor="middle">lee agenda</text>
+        <rect class="caja" x="166" y="50" width="104" height="38"/><text x="218" y="74" text-anchor="middle">valida: libre</text>
+        <rect class="choque" x="276" y="50" width="104" height="38"/><text x="328" y="74" text-anchor="middle">guarda</text>
+        <rect class="caja" x="56" y="110" width="104" height="38"/><text x="108" y="134" text-anchor="middle">lee agenda</text>
+        <rect class="caja" x="166" y="110" width="104" height="38"/><text x="218" y="134" text-anchor="middle">valida: libre</text>
+        <rect class="choque" x="276" y="110" width="104" height="38"/><text x="328" y="134" text-anchor="middle">guarda</text>
+        <text class="mal" x="20" y="190">Dos citas para el mismo actor a la misma hora</text>
+        <line x1="440" y1="12" x2="440" y2="206" class="fld"/>
+        <text class="n" x="470" y="24">Con bloqueo por agenda (esqueleto)</text>
+        <text x="470" y="74">T1</text><text x="470" y="134">T2</text>
+        <rect class="caja" x="506" y="50" width="112" height="38"/><text x="562" y="74" text-anchor="middle">bloquea agenda</text>
+        <rect class="caja" x="624" y="50" width="112" height="38"/><text x="680" y="74" text-anchor="middle">lee y valida</text>
+        <rect class="caja" x="742" y="50" width="112" height="38"/><text x="798" y="74" text-anchor="middle">guarda</text>
+        <rect class="espera" x="506" y="110" width="230" height="38"/><text x="621" y="134" text-anchor="middle">espera el bloqueo de T1</text>
+        <rect class="caja" x="742" y="110" width="112" height="38"/><text x="798" y="134" text-anchor="middle">ve T1: 409</text>
+        <text class="bien" x="470" y="190">Una cita aceptada y un rechazo con el conflicto</text>
+      </svg></div>
+      <figcaption>Comprobado con 8 hilos sobre el esqueleto: con el bloqueo se acepta 1 de 8; al retirar esa línea la prueba falla y el número de aceptadas varía por corrida (4 y 6 de 8 en las que hicimos).</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Diagramas C4</h2>
+    <figure>
+      <h3 style="margin:0">Nivel 1 · Contexto</h3>
+      <div class="lienzo"><svg viewBox="0 0 1000 340" role="img" aria-label="Cuatro tipos de usuario usan StudioFlow, que enviará avisos por un servicio de correo externo planificado.">
+        <defs><marker id="f1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="punta" d="M0 0L10 5L0 10z"/></marker></defs>
+        <g><rect class="caja" x="20" y="16" width="190" height="62"/><text class="n" x="115" y="42" text-anchor="middle">Productor</text><text class="m" x="115" y="62" text-anchor="middle">[Persona]</text>
+        <rect class="caja" x="20" y="96" width="190" height="62"/><text class="n" x="115" y="122" text-anchor="middle">Director</text><text class="m" x="115" y="142" text-anchor="middle">[Persona]</text>
+        <rect class="caja" x="20" y="176" width="190" height="62"/><text class="n" x="115" y="202" text-anchor="middle">Equipo técnico</text><text class="m" x="115" y="222" text-anchor="middle">[Persona]</text>
+        <rect class="caja" x="20" y="256" width="190" height="62"/><text class="n" x="115" y="282" text-anchor="middle">Actor</text><text class="m" x="115" y="302" text-anchor="middle">[Persona]</text></g>
+        <line class="fl" x1="210" y1="47" x2="498" y2="47" marker-end="url(#f1)"/><text x="354" y="39" text-anchor="middle">Crea producciones, controla presupuesto [HTTPS]</text>
+        <line class="fl" x1="210" y1="127" x2="498" y2="127" marker-end="url(#f1)"/><text x="354" y="119" text-anchor="middle">Programa escenas, resuelve conflictos [HTTPS]</text>
+        <line class="fl" x1="210" y1="207" x2="498" y2="207" marker-end="url(#f1)"/><text x="354" y="199" text-anchor="middle">Consulta el llamado del día [HTTPS]</text>
+        <line class="fl" x1="210" y1="287" x2="498" y2="287" marker-end="url(#f1)"/><text x="354" y="279" text-anchor="middle">Consulta su agenda [HTTPS]</text>
+        <rect class="caja" x="500" y="16" width="200" height="302"/><text class="n" x="600" y="150" text-anchor="middle">StudioFlow</text><text class="m" x="600" y="170" text-anchor="middle">[Sistema de software]</text><text class="m" x="600" y="190" text-anchor="middle">Planifica rodajes y</text><text class="m" x="600" y="206" text-anchor="middle">valida agendas</text>
+        <line class="fld" x1="700" y1="167" x2="838" y2="167" marker-end="url(#f1)"/><text x="769" y="150" text-anchor="middle">Envía avisos</text><text class="m" x="769" y="190" text-anchor="middle">[SMTP, planificado]</text>
+        <rect class="plan" x="840" y="130" width="146" height="74"/><text class="n" x="913" y="160" text-anchor="middle">Correo</text><text class="m" x="913" y="182" text-anchor="middle">[Sistema externo]</text>
+      </svg></div>
+      <div class="leyenda"><span><i></i>Persona o sistema</span><span><i class="lin"></i>Relación actual con su protocolo</span><span><i class="plan"></i>Relación o sistema planificado</span></div>
+    </figure>
+    <figure>
+      <h3 style="margin:0">Nivel 2 · Contenedores</h3>
+      <div class="lienzo"><svg viewBox="0 0 1000 600" role="img" aria-label="La aplicación web llama a una API de un solo proceso con tres módulos: Planificación consulta a Reparto y publica un evento a Presupuesto. La API usa una base PostgreSQL.">
+        <defs><marker id="f2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="punta" d="M0 0L10 5L0 10z"/></marker></defs>
+        <rect class="caja" x="390" y="12" width="220" height="56"/><text class="n" x="500" y="36" text-anchor="middle">Usuarios</text><text class="m" x="500" y="55" text-anchor="middle">[4 roles]</text>
+        <line class="fl" x1="500" y1="68" x2="500" y2="146" marker-end="url(#f2)"/><text x="510" y="102">Usa en el navegador [HTTPS]</text>
+        <rect class="plan" x="790" y="12" width="180" height="56"/><text class="n" x="880" y="36" text-anchor="middle">Correo</text><text class="m" x="880" y="55" text-anchor="middle">[Sistema externo]</text>
+        <rect class="fron" x="30" y="122" width="940" height="466"/><text class="m" x="44" y="142">StudioFlow [Límite del sistema]</text>
+        <rect class="caja" x="340" y="148" width="320" height="66"/><text class="n" x="500" y="172" text-anchor="middle">Aplicación web</text><text class="m" x="500" y="191" text-anchor="middle">[Contenedor: React, TypeScript]</text><text class="m" x="500" y="207" text-anchor="middle">Stripboard, llamado, copia local (planificada)</text>
+        <line class="fl" x1="500" y1="214" x2="500" y2="264" marker-end="url(#f2)"/><text x="510" y="243">Llama a la API [JSON/HTTPS, JWT]</text>
+        <rect class="api" x="60" y="266" width="880" height="176"/><text class="n" x="76" y="288">API</text><text class="m" x="110" y="288">[Contenedor: Spring Boot, Java 17, un solo proceso]</text>
+        <rect class="modulo" x="84" y="330" width="200" height="88"/><text class="n" x="184" y="360" text-anchor="middle">Reparto</text><text class="m" x="184" y="380" text-anchor="middle">[Módulo]</text><text class="m" x="184" y="398" text-anchor="middle">Personas y roles</text>
+        <rect class="modulo" x="400" y="330" width="200" height="88"/><text class="n" x="500" y="360" text-anchor="middle">Planificación</text><text class="m" x="500" y="380" text-anchor="middle">[Módulo]</text><text class="m" x="500" y="398" text-anchor="middle">Agenda y conflictos</text>
+        <rect class="modulo" x="716" y="330" width="200" height="88"/><text class="n" x="816" y="360" text-anchor="middle">Presupuesto</text><text class="m" x="816" y="380" text-anchor="middle">[Módulo]</text><text class="m" x="816" y="398" text-anchor="middle">Compromiso de costos</text>
+        <line class="fl" x1="400" y1="374" x2="286" y2="374" marker-end="url(#f2)"/><text x="343" y="352" text-anchor="middle" style="font-size:12px">sonTodosActores()</text><text class="m" x="343" y="394" text-anchor="middle">[contrato Java]</text>
+        <line class="fl" x1="600" y1="374" x2="714" y2="374" marker-end="url(#f2)"/><text x="657" y="352" text-anchor="middle" style="font-size:12px">EscenaProgramada</text><text class="m" x="657" y="394" text-anchor="middle">[evento síncrono]</text>
+        <line class="fld" x1="880" y1="266" x2="880" y2="70" marker-end="url(#f2)"/><text class="m" x="870" y="200" text-anchor="end">Envía avisos [SMTP, planificado]</text>
+        <line class="fl" x1="500" y1="442" x2="500" y2="506" marker-end="url(#f2)"/><text x="510" y="472">Lee, escribe y bloquea agenda [SQL/JDBC, TLS]</text>
+        <rect class="caja" x="320" y="508" width="360" height="66"/><text class="n" x="500" y="532" text-anchor="middle">Base de datos</text><text class="m" x="500" y="551" text-anchor="middle">[Contenedor: PostgreSQL en Supabase]</text><text class="m" x="500" y="567" text-anchor="middle">Tablas con prefijo por módulo, sin FK entre módulos</text>
+      </svg></div>
+      <div class="leyenda"><span><i></i>Contenedor o persona</span><span><i class="mod"></i>Módulo dentro de la API</span><span><i class="fron"></i>Límite del sistema</span><span><i class="lin"></i>Dependencia con su mecanismo</span><span><i class="plan"></i>Planificado</span></div>
+      <figcaption>El esqueleto implementa la API con sus tres módulos. Para arrancar con un comando sustituye la base por H2 en modo PostgreSQL y la aplicación React por una página de demostración.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Registros de decisión</h2>
+    <article class="adr">
+      <h3>ADR-001 · Monolito modular con fronteras verificadas</h3>
+      <h4>Estado</h4><p>Aceptada, 8 de noviembre de 2026.</p>
+      <h4>Contexto</h4><p>El driver principal exige que validar y guardar una cita sean atómicos, y la agenda de un actor cruza producciones. El segundo driver exige cambiar reglas sin afectar otras áreas. El equipo tiene dos personas y el backend actual organiza el código por tipo técnico, sin fronteras de negocio.</p>
+      <h4>Decisión</h4><p>Un solo proceso Spring Boot con los módulos Planificación, Reparto y Presupuesto. Cada uno tiene capas <code>web</code>, <code>aplicacion</code>, <code>dominio</code> e <code>infraestructura</code>, y expone únicamente su paquete <code>contrato</code>. ArchUnit hace fallar las pruebas ante un atajo.</p>
+      <h4>Alternativas descartadas</h4><ul><li><strong>Capas sin módulos:</strong> no protege las fronteras de negocio.</li><li><strong>Microservicios:</strong> convierte una transacción local en coordinación distribuida, con costo operativo que el volumen no justifica.</li><li><strong>Eventos con bróker:</strong> quien programa necesita respuesta síncrona, así que no ayuda al driver principal.</li></ul>
+      <h4>Consecuencias</h4><ul><li>Buena: la invariante cabe en una transacción local.</li><li>Buena: una violación de frontera rompe la compilación de pruebas.</li><li>Mala: no se puede escalar ni desplegar un módulo por separado.</li><li>Mala: un fallo grave del proceso detiene todos los módulos.</li><li>Mala: ArchUnit no revisa el SQL, así que el acceso a tablas ajenas depende de revisión de código.</li></ul>
+    </article>
+    <article class="adr">
+      <h3>ADR-002 · Bloqueo pesimista por agenda de actor</h3>
+      <h4>Estado</h4><p>Aceptada, 8 de noviembre de 2026.</p>
+      <h4>Contexto</h4><p>El backend actual valida y luego guarda, sin control de concurrencia, por lo que dos solicitudes simultáneas pueden pasar la validación (E1). Las reglas comparan una escena con toda la agenda del actor, incluidas otras producciones.</p>
+      <h4>Decisión</h4><p>Cada actor tiene una fila de agenda. Antes de leer, la transacción la bloquea con <code>SELECT … FOR UPDATE</code>, en orden ascendente de id para evitar interbloqueos.</p>
+      <h4>Alternativas descartadas</h4><ul><li><strong>Mantener validar y guardar:</strong> permite la doble cita; en la prueba se aceptaron entre 4 y 6 de 8, según la corrida.</li><li><strong>Bloqueo optimista por versión:</strong> en los momentos de reprogramación masiva produce reintentos justo cuando hay más contención.</li><li><strong>Restricción <code>EXCLUDE</code> de PostgreSQL:</strong> garantiza el no solapamiento, pero no expresa la advertencia de traslado ni los límites semanales de E2.</li><li><strong>Aislamiento <code>SERIALIZABLE</code>:</strong> correcto, pero obliga a reintentar toda la operación y aumenta los abortos.</li></ul>
+      <h4>Consecuencias</h4><ul><li>Buena: cero citas dobles sin importar la regla que se agregue.</li><li>Buena: solo compiten las escenas que comparten actor.</li><li>Mala: las escrituras sobre un mismo actor se serializan.</li><li>Mala: cada solicitud retiene una conexión mientras espera.</li><li>Mala: toda escritura futura sobre la agenda debe respetar el bloqueo y su orden.</li></ul>
+    </article>
+    <article class="adr">
+      <h3>ADR-003 · Evento en proceso y en la misma transacción hacia Presupuesto</h3>
+      <h4>Estado</h4><p>Aceptada, 8 de noviembre de 2026.</p>
+      <h4>Contexto</h4><p>Programar una escena compromete dinero, y el productor toma decisiones con esa cifra. Planificación no debe conocer a Presupuesto, para que las reglas de agenda evolucionen sin tocar finanzas.</p>
+      <h4>Decisión</h4><p>Planificación publica <code>EscenaProgramada</code> con el publicador de eventos de Spring. Presupuesto la consume de forma síncrona dentro de la misma transacción: se confirman ambas cosas o ninguna.</p>
+      <h4>Alternativas descartadas</h4><ul><li><strong>Llamada directa a Presupuesto:</strong> igual de consistente, pero acopla Planificación a un módulo que no necesita conocer.</li><li><strong>Evento tras confirmar la transacción:</strong> si el consumidor falla, la escena existe y el dinero no queda comprometido.</li><li><strong>Bandeja de salida (<em>outbox</em>) con consumo asíncrono:</strong> robusta y es la evolución prevista, pero introduce consistencia eventual y un proceso adicional sin necesidad actual.</li><li><strong>Disparador en la base de datos:</strong> oculta una regla de negocio fuera del código y de las pruebas de frontera.</li></ul>
+      <h4>Consecuencias</h4><ul><li>Buena: escena y presupuesto siempre coinciden; una escena rechazada no compromete dinero.</li><li>Buena: la dependencia apunta solo de Presupuesto hacia el contrato de Planificación.</li><li>Mala: un fallo en Presupuesto impide programar.</li><li>Mala: todas las programaciones de una producción compiten por la misma fila de presupuesto.</li><li>Mala: la transacción dura más. Se cambiaría a <em>outbox</em> si la espera sobre esa fila incumple E1.</li></ul>
+    </article>
+  </section>
+
+  <section>
+    <h2>Riesgos</h2>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Riesgo</th><th>Por qué importa</th><th>Qué verificar para descartarlo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>R1.</strong> El bloqueo se comporta distinto en Supabase que en H2</td><td>E1 se probó en H2 y, de forma parcial, en PostgreSQL 16 (11 de noviembre de 2026): 8 solicitudes simultáneas, 1 aceptada y 7 con 409, una sola cita en la base, latencia máxima de 0,27 s. Eso fue en un contenedor local y conexión directa.</td><td>Queda por repetir contra Supabase, directo y por el pooler de transacciones, y medir el p95 con más carga.</td></tr>
+        <tr><td><strong>R2.</strong> Contención en la fila de presupuesto y agotamiento de conexiones</td><td>Consecuencia de ADR-002 y ADR-003.</td><td>Prueba de carga con reprogramación masiva en una producción; observar espera de bloqueos y uso del pool.</td></tr>
+        <tr><td><strong>R3.</strong> Reglas duplicadas en frontend y backend</td><td><code>conflicts.ts</code> repite los 45 minutos y la clasificación; pueden divergir.</td><td>Prueba de contrato con los mismos casos en ambos lados, o usar siempre la validación en vacío del backend.</td></tr>
+        <tr><td><strong>R4.</strong> Presupuesto expuesto a roles no autorizados</td><td>Confirmado en el backend actual: <code>GET /productions</code> admite <code>ACTOR</code> y <code>CREW</code>, y la respuesta incluye las cifras. La interfaz solo las oculta.</td><td>Prueba por rol sobre cada endpoint de E4, tras separar la respuesta de Presupuesto.</td></tr>
+        <tr><td><strong>R5.</strong> Interpretación de la norma de menores</td><td>Fuentes secundarias citan un tope de 14 horas semanales; no se confirmó en el texto oficial.</td><td>Revisar el texto vigente de la Ley 1098 y consultar con un asesor legal antes de codificar el límite.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Si el negocio creciera diez veces</h3>
+    <p>Lo primero que se rompería, como hipótesis a confirmar en R2, es el pool de conexiones: cada programación retiene una conexión mientras espera bloqueos, y el proceso y la base son únicos. Después aparecerían la contención en la fila de presupuesto y el costo O(n²) de la auditoría de conflictos. El orden de respuesta sería pasar Presupuesto a <em>outbox</em>, añadir instancias de la API y calcular la auditoría por día. La agenda por actor resiste mejor, porque su contención depende de cuántas escenas comparten actor, no del total de producciones.</p>
+  </section>
+
+  <section>
+    <h2>Correspondencia con el esqueleto</h2>
+    <div class="tabla"><table class="ancho">
+      <thead><tr><th>Decisión</th><th>Dónde se ve</th><th>Cómo se demuestra</th></tr></thead>
+      <tbody>
+        <tr><td>ADR-001, capas y fronteras</td><td>Paquetes <code>com.studioflow.*</code></td><td><code>ReglasDeArquitecturaTest</code>, que además comprueba que detecta un atajo plantado</td></tr>
+        <tr><td>ADR-002, bloqueo</td><td><code>ProgramarEscena</code>, <code>AgendaRepositorioJdbc</code></td><td>Prueba con 8 hilos simultáneos</td></tr>
+        <tr><td>ADR-003, evento transaccional</td><td><code>EscenaProgramada</code>, <code>ServicioPresupuesto</code></td><td>Pasos 1 a 4 de la demostración y prueba de que un rechazo no compromete dinero</td></tr>
+      </tbody>
+    </table></div>
+    <p>Fuera del alcance del esqueleto: autenticación JWT, roles, copia local del llamado y migración del backend actual a esta estructura.</p>
+  </section>
+</main>

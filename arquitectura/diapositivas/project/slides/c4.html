@@ -1,0 +1,54 @@
+<section id="c4" data-transition="fade" style="background:#F4F7F6;color:#17242B;font-family:'Archivo', Arial, sans-serif;padding:112px 128px 150px;display:flex;flex-direction:column;align-items:center;gap:8px">
+<p style="font-family:'Courier Prime', 'Courier New', monospace;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6A6C">C4 · Nivel 2 · Contenedores</p>
+<div style="display:flex;flex-direction:column;align-items:center;background:#FFFFFF;border:2px solid #17242B;border-radius:8px;padding:10px 40px;width:520px">
+<p style="font-size:30px;font-weight:700">Usuarios</p>
+<p style="font-size:24px;color:#55666F">4 roles · navegador</p>
+</div>
+<x-shape kind="arrow-down" style="background:#17242B;width:36px;height:44px"></x-shape>
+<div style="display:flex;flex-direction:column;align-items:center;background:#FFFFFF;border:2px solid #17242B;border-radius:8px;padding:10px 40px;width:520px">
+<p style="font-size:30px;font-weight:700">Aplicación web</p>
+<p style="font-size:24px;color:#55666F">React · TypeScript</p>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<x-shape kind="arrow-down" style="background:#17242B;width:36px;height:44px"></x-shape>
+<p style="font-size:24px;color:#55666F">JSON sobre HTTPS, JWT</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;border:2px dashed #55666F;border-radius:8px;padding:16px 32px;width:1624px">
+<p style="font-size:26px;font-weight:700">API · Spring Boot · un solo proceso</p>
+<div style="display:flex;align-items:center">
+<div style="display:flex;flex-direction:column;align-items:center;background:#F4F7F6;border:2px solid #0A6A6C;border-radius:8px;padding:12px 16px;width:360px">
+<p style="font-size:30px;font-weight:700">Reparto</p>
+<p style="font-size:24px;color:#55666F">Personas y roles</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;width:240px">
+<p style="font-size:24px;text-align:center">sonTodosActores()</p>
+<x-shape kind="arrow-left" style="background:#0A6A6C;width:110px;height:40px"></x-shape>
+<p style="font-size:24px;color:#55666F">contrato Java</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;background:#F4F7F6;border:2px solid #0A6A6C;border-radius:8px;padding:12px 16px;width:360px">
+<p style="font-size:30px;font-weight:700">Planificación</p>
+<p style="font-size:24px;color:#55666F">Agenda y conflictos</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;width:240px">
+<p style="font-size:24px;text-align:center">EscenaProgramada</p>
+<x-shape kind="arrow-right" style="background:#0A6A6C;width:110px;height:40px"></x-shape>
+<p style="font-size:24px;color:#55666F">evento, misma transacción</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;background:#F4F7F6;border:2px solid #0A6A6C;border-radius:8px;padding:12px 16px;width:360px">
+<p style="font-size:30px;font-weight:700">Presupuesto</p>
+<p style="font-size:24px;color:#55666F">Dinero comprometido</p>
+</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<x-shape kind="arrow-down" style="background:#17242B;width:36px;height:44px"></x-shape>
+<p style="font-size:24px;color:#55666F">SQL, bloqueo SELECT … FOR UPDATE</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;background:#FFFFFF;border:2px solid #17242B;border-radius:8px;padding:10px 40px;width:520px">
+<p style="font-size:30px;font-weight:700">Base de datos</p>
+<p style="font-size:24px;color:#55666F">PostgreSQL · tablas con prefijo por módulo</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#55666F">StudioFlow · Grupo 5A</p>
+<p style="position:absolute;right:128px;bottom:64px;font-size:24px;color:#55666F">6</p>
+<aside>Qué decir (50 s). Este es el nivel 2 del C4. Un navegador con la aplicación React llama a una única API de Spring Boot. Dentro hay tres módulos. Planificación le pregunta a Reparto si todos los citados son actores, por un contrato Java, no por red. Cuando programa una escena publica el evento EscenaProgramada y Presupuesto lo consume dentro de la misma transacción. Todo termina en una base PostgreSQL con tablas prefijadas por módulo y sin claves foráneas entre módulos. Importante: es un solo proceso. No decimos microservicios porque no lo son. El esqueleto implementa la API con sus tres módulos; usa H2 en vez de Supabase y una página de demostración en vez de React.</aside>
+</section>
