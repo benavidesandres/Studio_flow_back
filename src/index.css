@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-ready: var(--ready);
+  --color-delayed: var(--delayed);
+  --color-problem: var(--problem);
+  --color-done: var(--done);
+}
+
+/*
+ * The interface is monochrome on purpose: colour only ever means shoot status,
+ * so what is late or broken is the first thing a producer sees.
+ */
+:root,
+.dark {
+  color-scheme: dark;
+  --bg: #0f1012;
+  --surface: #17181b;
+  --raised: #202226;
+  --sunken: #131417;
+  --line: rgb(255 255 255 / 0.08);
+  --line-strong: rgb(255 255 255 / 0.16);
+  --fg: #f2f1ee;
+  --fg-2: #adafb5;
+  --fg-3: #868993;
+  --primary: #f2f1ee;
+  --on-primary: #131417;
+  --ready: #3fb27f;
+  --delayed: #e0a63a;
+  --problem: #ef5b5b;
+  --done: #8a8f98;
+  --overlay: rgb(5 5 7 / 0.62);
+  --shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+}
+
+.light {
+  color-scheme: light;
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --raised: #f1f0ec;
+  --sunken: #efeeea;
+  --line: rgb(22 20 14 / 0.1);
+  --line-strong: rgb(22 20 14 / 0.2);
+  --fg: #16171a;
+  --fg-2: #55585f;
+  --fg-3: #6c6f78;
+  --primary: #16171a;
+  --on-primary: #ffffff;
+  --ready: #148a5b;
+  --delayed: #b27a0e;
+  --problem: #d23b3b;
+  --done: #6f747c;
+  --overlay: rgb(22 20 14 / 0.36);
+  --shadow: 0 12px 32px -10px rgb(22 20 14 / 0.25);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--fg) 24%, transparent);
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-offset: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  dialog {
+    color: inherit;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: none;
+    max-height: none;
+  }
+  dialog::backdrop {
+    background: var(--overlay);
+    animation: fade 140ms ease-out;
+  }
+}
+
+@utility tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Sentence case for localized dates; Title Case would be wrong for Spanish month names. */
+@utility cap-first {
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+/* Delayed strips are hatched and problem strips notched, so state never relies on hue alone. */
+@utility strip-hatched {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--delayed) 0 3px,
+    color-mix(in srgb, var(--delayed) 45%, transparent) 3px 6px
+  );
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(32px);
+    opacity: 0;
+  }
+}
+
+/* Fill mode stays "backwards": a retained transform would break fixed-position menus inside. */
+.anim-rise {
+  animation: rise 220ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.anim-pop {
+  animation: pop 130ms ease-out backwards;
+}
+.anim-slide {
+  animation: slide-in 200ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
