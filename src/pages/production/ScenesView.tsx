@@ -1,5 +1,5 @@
 import { useMemo, useState, type DragEvent } from 'react';
-import { ArrowDown, ArrowUp, Clapperboard, Columns3, List, Plus, Search, TriangleAlert } from 'lucide-react';
+import { ArrowDown, ArrowUp, Clapperboard, Columns3, List, Plus, Search, Sparkles, TriangleAlert } from 'lucide-react';
 import type { Scene, ShootStatus } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Field';
@@ -7,6 +7,7 @@ import { AvatarStack } from '@/components/ui/Avatar';
 import { EmptyState, PageHeader, Panel, Segmented } from '@/components/ui/Panel';
 import { CallSheet } from '@/components/scenes/CallSheet';
 import { DraggableScene } from '@/components/scenes/DraggableScene';
+import { ScriptImportModal } from '@/components/scenes/ScriptImportModal';
 import { StatusBadge } from '@/components/scenes/StatusBadge';
 import { useConflictPairs, usePermissions, useStatusChanger } from '@/components/scenes/useScenePermissions';
 import { useProductionStore } from '@/store/useProductionStore';
@@ -185,6 +186,7 @@ export function ScenesView() {
   const pairs = useConflictPairs();
 
   const [mode, setMode] = useState<'table' | 'board'>('table');
+  const [importing, setImporting] = useState(false);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<ShootStatus | 'ALL'>('ALL');
   const [location, setLocation] = useState('');
@@ -220,9 +222,14 @@ export function ScenesView() {
         subtitle={t('scenes.subtitle', { count: scenes.length })}
         actions={
           editScenes && (
-            <Button variant="primary" icon={Plus} onClick={() => openSceneForm({ date: todayISO() })}>
-              {t('scene.new')}
-            </Button>
+            <>
+              <Button icon={Sparkles} onClick={() => setImporting(true)}>
+                {t('import.open')}
+              </Button>
+              <Button variant="primary" icon={Plus} onClick={() => openSceneForm({ date: todayISO() })}>
+                {t('scene.new')}
+              </Button>
+            </>
           )
         }
       />
@@ -285,9 +292,14 @@ export function ScenesView() {
               description={t('scenes.emptyBody')}
               action={
                 editScenes && (
-                  <Button variant="primary" icon={Plus} onClick={() => openSceneForm({ date: todayISO() })}>
-                    {t('scene.new')}
-                  </Button>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <Button icon={Sparkles} onClick={() => setImporting(true)}>
+                      {t('import.open')}
+                    </Button>
+                    <Button variant="primary" icon={Plus} onClick={() => openSceneForm({ date: todayISO() })}>
+                      {t('scene.new')}
+                    </Button>
+                  </div>
                 )
               }
             />
@@ -302,6 +314,8 @@ export function ScenesView() {
       ) : (
         <SceneBoard scenes={visible} conflictIds={conflictIds} />
       )}
+
+      {importing && <ScriptImportModal onClose={() => setImporting(false)} />}
     </>
   );
 }
